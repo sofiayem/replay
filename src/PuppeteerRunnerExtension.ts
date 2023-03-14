@@ -161,6 +161,24 @@ export class PuppeteerRunnerExtension extends RunnerExtension {
           await element.dispose();
         }
         break;
+      case StepType.Drag: {
+        let [x, y] = [step.offsetX, step.offsetY];
+        await mainPage.mouse.move(x, y);
+        await mainPage.mouse.down({
+          button: step.button && mouseButtonMap.get(step.button),
+        });
+        for (let i = 0; i < step.deltas.length; i += 2) {
+          [x, y] = [
+            x + (step.deltas[i] as number),
+            y + (step.deltas[i + 1] as number),
+          ];
+          await mainPage.mouse.move(x, y);
+        }
+        await mainPage.mouse.up({
+          button: step.button && mouseButtonMap.get(step.button),
+        });
+        break;
+      }
       case StepType.Hover:
         {
           await scrollIntoViewIfNeeded(step.selectors, localFrame, timeout);
